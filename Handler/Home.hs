@@ -23,9 +23,9 @@ postHomeR = do
   case result of
   FormSuccess fi -> do
     app <- getYesod
-    --addFile app $ fileName fi
     fileBytes <- runResourceT $ fileSource fi $$ sinkLbs
-    addFile app(fileName fi, fileBytes)
+    --addFile app $ StoredFile (fileName fi) fileBytes
+    addFile app $ StoredFile (fileName fi) (fileContentType fi) fileBytes
   _ -> return ()
   redirect HomeR
 

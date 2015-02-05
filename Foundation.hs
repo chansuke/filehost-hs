@@ -8,12 +8,11 @@ import qualified Data.IntMap as IntMap
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Text.Hamlet
-
 import Yesod
 import Yesod.Default.Util
 
-data StoredFile = StoredFile !Text !ByteString
---type Store = [(Int, StoredFile)]
+--data StoredFile = StoredFile !Text !ByteString
+data StoredFile = StoredFile !Text !Text !ByteString
 type Store = IntMap StoredFile
 data App = App (TVar Int) (TVar Store)
 
@@ -35,23 +34,22 @@ getNextId(App tnextld_) = do
 
 getList :: Handler [(Int, StoredFile)]
 getList = do
-  App tstate <- getYesod
+  --App tstate <- getYesod
   --liftIO $ readTVarIO tstore
+  App _tstore <- getYesod
   store <- liftIO $ readTVarIO tstore
   return $ IntMap.toList store
 
 addFile :: App -> StoredFile -> Handler ()
-addFile app@(App _ tstore) file =
+--addFile app@(App _ tstore) file =
   liftIO . atomically $ do
     nextld <- getNextId app
-    --modifyTVar tstore $ \ files -> (nextld, files) : files
     modifyTVar tstore $ IntMap.insert ident file
 
 getById :: Int -> Handler StoredFile
 getById ident = do
     App tstore <- getYesod
     store <- liftIO $ readTVarIO tstore
-    --case lookup ident operations of
     case IntMap.lookup ident store of
       Nothing -> notFound
       Just file -> return file
